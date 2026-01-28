@@ -1,58 +1,3 @@
-#!/usr/bin/env pwsh
-
-# ==============================
-# Parámetros
-# ==============================
-#$version = "1.0"
-#$appname = "Gradle"
-#$branch = "1.0"
-#$repositorio = "Gradle"
-
-param (
-    [Parameter(Mandatory=$true)]
-    [string]$version,
-
-    [Parameter(Mandatory=$true)]
-    [string]$appname
-
-)
-
-$branch = $version
-$repositorio = $appname
-
-# ==============================
-# Configuración de errores
-# ==============================
-$ErrorActionPreference = "Stop"
-Set-PSDebug -Trace 1
-
-# ==============================
-# Configurar JAVA_HOME temporal a JDK 17
-# ==============================
-$env:JAVA_HOME = "C:\Program Files\Java\jdk-17"
-$env:PATH = "$($env:JAVA_HOME)\bin;$($env:PATH)"
-$env:SCANCENTRAL_JAVA_HOME = "C:\Program Files\Java\jdk-17"
-
-Write-Host "Usando JAVA_HOME=$env:JAVA_HOME"
-java -version
-
-# Listar certificados Fortify (si existen)
-try {
-    keytool -list -v -keystore "$env:JAVA_HOME/lib/security/cacerts" -storepass changeit |
-        Select-String "fortify"
-} catch {
-    # Ignorar errores
-}
-
-
-$ssc_url = "https://ssc.otlatam.com/ssc"
-$ssctoken = "6a28a13a-0575-4409-a385-231fb1a1149e"
-$debrickedtoken = "e20bebc6fdf1b7b1074f52e3f7283d98011a678183664b9d"
-$author = "admin"
-$integration = "CLI"
-$debricked_bin = "C:\Users\Administrator\Downloads\debricked.exe"
-$fcli_path = "C:\Users\Administrator\Downloads"
-
 # ==============================
 # Primera parte: Escaneo Debricked
 # ==============================
@@ -70,7 +15,7 @@ $EXIT_CODE = $LASTEXITCODE
 $SCAN_OUTPUT | ForEach-Object { Write-Host $_ }
 
 if ($EXIT_CODE -ne 0) {
-    Write-Host "? El escaneo falló con exit code $EXIT_CODE."
+    Write-Host "? El escaneo fallÃ³ con exit code $EXIT_CODE."
 }
 
 if ($SCAN_OUTPUT -match "Gradle wasn't found") {
@@ -83,7 +28,7 @@ if ($SCAN_OUTPUT -match "Could not validate enterprise billing plan") {
     Write-Host "?? No se pudo validar el plan Enterprise"
 }
 if ($SCAN_OUTPUT -match "failed to find repository URL") {
-    Write-Host "?? No se detectó URL del repo"
+    Write-Host "?? No se detectÃ³ URL del repo"
 }
 
 $match = [regex]::Match(($SCAN_OUTPUT -join "`n"), '([0-9]+)\s+vulnerabilities found')
@@ -104,7 +49,7 @@ if ($match.Success) {
 # Segunda parte: Carga a SSC
 # ==============================
 Write-Host "?? Iniciando carga de reporte Debricked a SSC"
-Write-Host "App: $appname | Versión: $version | Rama: $branch | Repo: $repositorio"
+Write-Host "App: $appname | VersiÃ³n: $version | Rama: $branch | Repo: $repositorio"
 
 $session_output = java -jar "$fcli_path\fcli.jar" `
     ssc session login `
@@ -114,12 +59,12 @@ $session_output = java -jar "$fcli_path\fcli.jar" `
 $session_text = $session_output -join "`n"
 
 if ($session_text -notmatch "\bCREATED\b") {
-    Write-Host "? Error al iniciar sesión en SSC"
+    Write-Host "? Error al iniciar sesiÃ³n en SSC"
     Write-Host $session_text
     exit 1
 }
 
-Write-Host "? Sesión iniciada correctamente en SSC"
+Write-Host "? SesiÃ³n iniciada correctamente en SSC"
 
 # --- Validar o crear appVersion ---
 Write-Host "?? Validando appVersion ${appname}:${version}"
@@ -225,8 +170,9 @@ if ($LASTEXITCODE -eq 0) {
 
 #python debricked-convert-to-pdf.py
 
-# --- Cerrar sesión ---
+# --- Cerrar sesiÃ³n ---
 java -jar "$fcli_path\fcli.jar" ssc session logout --no-revoke-token
-Write-Host "?? Sesión cerrada en SSC"
+Write-Host "?? SesiÃ³n cerrada en SSC"
+
 
 exit 0
