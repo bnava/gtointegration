@@ -166,9 +166,9 @@ if ($LASTEXITCODE -eq 0) {
     exit 1
 }
 
-#java -jar "$fcli_path\fcli.jar" ssc action run gitlab-debricked-report --appversion $appversion_id --file debricked-report.json
+java -jar "$fcli_path\fcli.jar" ssc action run gitlab-debricked-report --appversion $appversion_id --file debricked-report.json
 
-#python debricked-convert-to-pdf.py
+python debricked-convert-to-pdf.py
 
 # --- Cerrar sesión ---
 java -jar "$fcli_path\fcli.jar" ssc session logout --no-revoke-token
@@ -176,3 +176,4 @@ Write-Host "?? Sesión cerrada en SSC"
 
 
 exit 0
+
